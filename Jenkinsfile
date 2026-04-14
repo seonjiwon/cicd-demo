@@ -61,8 +61,16 @@ pipeline {
             }
         }
 
-        // 5단계: Blue/Green 배포
-        stage('5. Deploy (Blue/Green)') {
+        // 5단계: Jenkins 서버의 Docker 이미지 정리
+        // push 완료 후 로컬 이미지를 삭제하여 디스크 공간 확보
+        stage('5. Cleanup Jenkins Image') {
+            steps {
+                sh "docker rmi ${REPOSITORY}:latest || true"
+            }
+        }
+
+        // 6단계: Blue/Green 배포
+        stage('6. Deploy (Blue/Green)') {
             steps {
                 // 비밀번호 기반 SSH 접속
                 withCredentials([usernamePassword(
