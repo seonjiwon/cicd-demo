@@ -19,7 +19,7 @@ public class TodoService {
 
     public Todo findById(Long id) {
         return todoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Todo2 not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Todo3 not found: " + id));
     }
 
     @Transactional
