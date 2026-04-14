@@ -19,6 +19,6 @@ class HealthControllerTest {
     void version_returnsV4() throws Exception {
         mockMvc.perform(get("/version"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("v4"));
+                .andExpect(content().string("v5"));
     }
 }
