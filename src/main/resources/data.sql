@@ -1,0 +1,10 @@
+INSERT IGNORE INTO todo (id, title, completed) VALUES (1, '장보기 - 우유, 계란, 빵', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (2, 'Spring Boot 프로젝트 세팅', true);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (3, 'Jenkins 파이프라인 작성', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (4, 'SonarQube 연동 테스트', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (5, 'Docker 이미지 빌드', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (6, '단위 테스트 작성', true);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (7, 'PR 리뷰 요청', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (8, '운동 30분 하기', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (9, '이력서 업데이트', false);
+INSERT IGNORE INTO todo (id, title, completed) VALUES (10, '팀 회의 자료 준비', true);
