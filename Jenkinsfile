@@ -55,9 +55,7 @@ pipeline {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-key') {
                         // 빌드 번호 태그: 롤백 시 특정 버전 지정 가능
-                        def appImage = docker.build("${REPOSITORY}:${BUILD_NUMBER}")
-                        appImage.push()
-                        // latest 태그도 함께 push
+                        def appImage = docker.build("${REPOSITORY}:latest")
                         appImage.push('latest')
                     }
                 }
