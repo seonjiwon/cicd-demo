@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.5.13'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id "org.sonarqube" version "7.2.3.7755"
+	id 'jacoco'
 }
 
 group = 'dev.fisa'
@@ -35,6 +36,16 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+test {
+	finalizedBy jacocoTestReport  // 테스트 끝나면 자동으로 리포트 생성
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = true  // SonarQube는 XML 형식 필요
+	}
 }
 
 tasks.named('test') {
