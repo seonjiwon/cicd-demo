@@ -54,9 +54,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-key') {
-                        // 빌드 번호 태그: 롤백 시 특정 버전 지정 가능
                         def appImage = docker.build("${REPOSITORY}:latest")
-                        appImage.push('latest')
+                        appImage.push()
                     }
                 }
             }
@@ -75,10 +74,8 @@ pipeline {
                         sshpass -p \$SSH_PASS ssh -o StrictHostKeyChecking=no \$SSH_USER@${DEPLOY_HOST} '
 
                             # ===== 1. 현재 활성 환경 확인 =====
-                            # Nginx 설정 파일에서 현재 upstream이 blue인지 green인지 파악
                             CURRENT=\$(grep -o "sw_team_2_[a-z]*" ${NGINX_CONF_PATH} | head -1)
 
-                            # 현재가 blue면 green에 배포, green이면 blue에 배포
                             if [ "\$CURRENT" = "sw_team_2_blue" ]; then
                                 TARGET="sw_team_2_green"
                                 TARGET_PORT=8103
@@ -88,7 +85,7 @@ pipeline {
                             fi
 
                             # ===== 2. 새 이미지 Pull =====
-                            docker pull ${REPOSITORY}:${BUILD_NUMBER}
+                            docker pull ${REPOSITORY}:latest
 
                             # ===== 3. 비활성 컨테이너 정리 후 새 버전 실행 =====
                             docker stop \$TARGET || true
@@ -101,10 +98,9 @@ pipeline {
                                 -e DB_NAME=${DB_NAME} \
                                 -e DB_USERNAME=${DB_USER} \
                                 -e DB_PASSWORD=${DB_PASS} \
-                                ${REPOSITORY}:${BUILD_NUMBER}
+                                ${REPOSITORY}:latest
 
                             # ===== 4. Health Check =====
-                            # 3초 간격, 최대 10회 시도 (총 30초 대기)
                             for i in \$(seq 1 10); do
                                 if curl -sf http://localhost:\$TARGET_PORT/actuator/health > /dev/null 2>&1; then
                                     echo "Health check passed"
