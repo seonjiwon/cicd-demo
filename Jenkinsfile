@@ -21,8 +21,8 @@ pipeline {
     }
 
     stages {
-        // 1단계: Gradle 빌드 (테스트 제외)
-        stage('1. Build') {
+        // 1단계: Gradle 빌드 + 테스트 + Jacoco 커버리지 리포트 생성
+        stage('1. Build & Test') {
             steps {
                 sh 'chmod +x ./gradlew'
                 sh './gradlew clean build'
@@ -38,22 +38,34 @@ pipeline {
             }
         }
 
-        // 3단계: Docker 이미지 빌드 및 Docker Hub에 Push
-        stage('3. Docker Build & Push') {
+        // 3단계: Quality Gate 결과 확인
+        // SonarQube가 분석 완료 후 통과/실패 판정을 내릴 때까지 대기
+        // 실패 시 파이프라인 중단
+        stage('3. Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        // 4단계: Docker 이미지 빌드 및 Docker Hub에 Push
+        stage('4. Docker Build & Push') {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-key') {
-                        // 빌드 번호 태그 + latest 태그로 push
+                        // 빌드 번호 태그: 롤백 시 특정 버전 지정 가능
                         def appImage = docker.build("${REPOSITORY}:${BUILD_NUMBER}")
                         appImage.push()
+                        // latest 태그도 함께 push
                         appImage.push('latest')
                     }
                 }
             }
         }
 
-        // 4단계: Blue/Green 배포
-        stage('4. Deploy (Blue/Green)') {
+        // 5단계: Blue/Green 배포
+        stage('5. Deploy (Blue/Green)') {
             steps {
                 // 비밀번호 기반 SSH 접속
                 withCredentials([usernamePassword(
