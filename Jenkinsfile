@@ -26,8 +26,7 @@ pipeline {
         stage('2. SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'echo "SONAR_HOST_URL=$SONAR_HOST_URL"'
-                    sh './gradlew sonar --info'
+                    sh './gradlew sonar'
                 }
             }
         }
