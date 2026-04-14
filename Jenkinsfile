@@ -7,9 +7,9 @@ pipeline {
         REPOSITORY = "${DOCKERHUB_ID}/${IMAGE_NAME}"
         DEPLOY_SERVER = "sw_team_2@172.21.33.69"
 
-        DB_HOST = credentials('DB-HOST')
-        DB_NAME = credentials('DB-NAME')
-        DB_PASS = credentials('DB-PASSWORD')
+        DB_HOST = credentials('DB_HOST')
+        DB_NAME = credentials('DB_NAME')
+        DB_PASS = credentials('DB_PASSWORD')
         DB_USER = "root"
 
         NGINX_CONF_PATH = "/home/sw_team_2/app/nginx/conf.d/app.conf"
