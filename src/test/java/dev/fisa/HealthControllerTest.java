@@ -17,6 +17,7 @@ class HealthControllerTest {
 
     @Test
     void version_returnsV4() throws Exception {
+        System.out.println("문제 되는 코드1");
         mockMvc.perform(get("/version"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("v5"));
