@@ -54,3 +54,77 @@ SSH로 배포 서버에 접속하여 Blue/Green 무중단 배포를 수행합니
 ### 동작 원리
 
 동일한 Docker 이미지를 Blue(포트 8102)와 Green(포트 8103) 두 컨테이너로 분리하여 운영합니다. 배포 시 현재 트래픽을 받지 않는 쪽에 새 버전을 배포하고, 검증 후 Nginx가 트래픽을 전환합니다.
+
+배포 전:
+사용자 → Nginx(8100) → Blue(8102) [v1] ✅ 활성
+Green(8103)      ❌ 비활성
+배포 중:
+사용자 → Nginx(8100) → Blue(8102) [v1] ✅ 트래픽 유지
+Green(8103) [v2] 🔄 기동 + Health Check
+전환 후:
+사용자 → Nginx(8100) → Blue(8102) [v1] ❌ 정리
+Green(8103) [v2] ✅ 활성
+
+### 전환 메커니즘 (Nginx)
+
+Nginx의 `app.conf`에서 upstream 서버를 정의하고, 배포 시 `sed` 명령으로 upstream 대상을 교체한 뒤 `nginx -s reload`로 설정을 반영합니다. reload는 기존 연결을 유지한 채 새 설정을 적용하므로 다운타임이 발생하지 않습니다.
+
+```nginx
+upstream backend {
+    server sw_team_2_blue:8080;  # 이 값을 sw_team_2_green으로 교체
+}
+```
+
+### 롤백 방법
+
+이전 버전의 컨테이너를 다시 띄우고 Nginx upstream을 되돌린 뒤 reload하면 즉시 롤백됩니다.
+
+## 5. 인프라 구성
+
+### Docker 네트워크
+
+모든 컨테이너는 `sw_team_2_network`에 연결되어 컨테이너 이름으로 서로 통신합니다.
+
+### MySQL
+
+`docker-compose.yml`로 관리하며 배포와 무관하게 항상 실행됩니다.
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sw_team_2_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: todo
+    ports:
+      - "8101:3306"
+    volumes:
+      - sw_team_2_mysql_data:/var/lib/mysql
+    networks:
+      - sw_team_2_network
+    restart: unless-stopped
+```
+
+### Nginx
+
+Blue 컨테이너가 실행된 후 `docker run`으로 별도 실행합니다. 설정 파일은 호스트에서 마운트합니다.
+
+### Dockerfile
+
+```dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+## 6. 트러블슈팅
+
+| 문제 | 원인 | 해결 |
+|------|------|------|
+| SonarQube 컨테이너 반복 종료 | `vm.max_map_count` 기본값(65530)이 Elasticsearch 최소 요구치(262144) 미달 | `sudo sysctl -w vm.max_map_count=262144` |
+| SonarQube "unsupported URI" | 컨테이너 이름(`seonjiwon_sonarqube_1`)의 언더스코어가 HTTP URI 표준 위반 | `docker network connect --alias seonjiwon-sonarqube`로 하이픈 기반 별칭 부여 |
+| Jenkins에서 Docker 권한 오류 | Jenkins 컨테이너가 Docker 소켓 접근 권한 없음 | `docker exec -u root jenkins chmod 666 /var/run/docker.sock` |
+| 테스트 빌드 실패 (DB 연결) | Jenkins 환경에서 MySQL 미존재 | 테스트용 `src/test/resources/application.yml`에 H2 인메모리 DB 설정 분리 |
