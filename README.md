@@ -45,7 +45,9 @@ SonarQube 서버가 분석 결과를 처리한 뒤 Quality Gate 통과 여부를
 
 > 실패 시 파이프라인이 중단되어 품질 기준을 충족하지 않는 코드는 배포되지 않습니다.
 
-<img width="1622" alt="image (3)" src="https://github.com/user-attachments/assets/43c9febf-4144-42de-aefa-480b6a4648dd" />
+<img width="500" alt="image (3)" src="https://github.com/user-attachments/assets/43c9febf-4144-42de-aefa-480b6a4648dd" />
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/2478c4f2-778b-4899-a3fd-c413e3b3bbbf" />
+
 <img width="500" alt="image (4)" src="https://github.com/user-attachments/assets/d39f484b-35cd-4880-b68b-d6b919b5608b" />
 <img width="500" alt="image (5)" src="https://github.com/user-attachments/assets/c8f8250e-6336-4846-a373-08d77b6790e9" />
 
